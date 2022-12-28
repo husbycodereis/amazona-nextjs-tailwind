@@ -8,6 +8,7 @@ import { Store } from "../../utils/Store";
 const ProductScreen = () => {
   const { state, dispatch } = useContext(Store);
   const { query } = useRouter();
+  const router = useRouter();
   const { slug } = query;
   const product = data.products.find((x) => x.slug === slug);
   if (!product) {
@@ -16,12 +17,13 @@ const ProductScreen = () => {
   const addToCartHandler = () => {
     const existItem = state.cart.cartItems.find((x) => x.slug === product.slug);
     const quantity = existItem ? existItem.quantity + 1 : 1;
-    dispatch({ type: "CART_ADD_ITEM", payload: { ...product, quantity } });
 
     if (product.countInStock < quantity) {
       alert("Out of Stock, booy");
       return;
     }
+    dispatch({ type: "CART_ADD_ITEM", payload: { ...product, quantity } });
+    router.push("/cart");
   };
 
   return (

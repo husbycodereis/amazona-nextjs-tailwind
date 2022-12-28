@@ -4,15 +4,22 @@ import React, { useContext } from "react";
 import Layout from "../components/Layout";
 import { Store } from "../utils/Store";
 import { XCircleIcon } from "@heroicons/react/outline";
+import { useRouter } from "next/router";
 
 const CartScreen = () => {
+  const router = useRouter();
   const { state, dispatch } = useContext(Store);
   const {
     cart: { cartItems },
   } = state;
   const removeItemHandler = (item) => {
-    dispatch({type: "CART_REMOVE_ITEM", payload: item})
-  }
+    dispatch({ type: "CART_REMOVE_ITEM", payload: item });
+  };
+
+  const updateCartHandler = (item, qty) => {
+    const quantity = Number(qty);
+    dispatch({ type: "CART_ADD_ITEM", payload: { ...item, quantity } });
+  };
 
   return (
     <Layout title="Shopping Cart">
@@ -50,10 +57,23 @@ const CartScreen = () => {
                         </div>
                       </Link>
                     </td>
-                    <td className="p-5 text-right">{item.quantity}</td>
+                    <td className="p-5 text-right">
+                      <select
+                        value={item.quantity}
+                        onChange={(e) =>
+                          updateCartHandler(item, e.target.value)
+                        }
+                      >
+                        {[...Array(item.countInStock).keys()].map((x) => (
+                          <option key={x + 1} value={x + 1}>
+                            {x + 1}
+                          </option>
+                        ))}
+                      </select>
+                    </td>
                     <td className="p-5 text-right">${item.price}</td>
                     <td className="p-5 text-center">
-                      <button onClick={()=> removeItemHandler(item)}>
+                      <button onClick={() => removeItemHandler(item)}>
                         <XCircleIcon className="w-5 h-5"></XCircleIcon>
                       </button>
                     </td>
@@ -61,6 +81,24 @@ const CartScreen = () => {
                 ))}
               </tbody>
             </table>
+          </div>
+          <div className="p-5 card">
+            <ul>
+              <li>
+                <div className="pb-3 text-xl">
+                  Subtotal ({cartItems.reduce((a, c) => a + c.quantity, 0)}) : $
+                  {cartItems.reduce((a, c) => a + c.quantity * c.price, 0)}
+                </div>
+              </li>
+              <li>
+                <button
+                  onClick={() => router.push("/shipping")}
+                  className="w-full primary-button"
+                >
+                  Check Out
+                </button>
+              </li>
+            </ul>
           </div>
         </div>
       )}
